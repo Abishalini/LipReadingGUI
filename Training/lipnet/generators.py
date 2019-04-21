@@ -1,16 +1,23 @@
-from lipnet.lipreading.helpers import text_to_labels
-from lipnet.lipreading.videos import Video
-from lipnet.lipreading.aligns import Align
-from lipnet.helpers.threadsafe import threadsafe_generator
-from lipnet.helpers.list import get_list_safe
+import sys, os
+CURRENT_PATH = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, CURRENT_PATH)
+
+from helpers import text_to_labels
+from videos import Video
+from aligns import Align
+from threadsafe import threadsafe_generator
 from keras import backend as K
 import numpy as np
 import keras
 import pickle
-import os
 import glob
 import multiprocessing
 
+def get_list_safe(l, index, size):
+    ret = l[index:index+size]
+    while size - len(ret) > 0:
+        ret += l[0:size - len(ret)]
+    return ret
 
 # datasets/[train|val]/<sid>/<id>/<image>.png
 # or datasets/[train|val]/<sid>/<id>.mpg
@@ -110,19 +117,12 @@ class BasicGenerator(keras.callbacks.Callback):
         return align_hash
 
     def build_dataset(self):
-        '''
-        if os.path.isfile(self.get_cache_path()):
-            print "\nLoading dataset list from cache..."
-            with open (self.get_cache_path(), 'rb') as fp:
-                self.train_list, self.val_list, self.align_hash = pickle.load(fp)
-        else:
-            '''
         print("\nEnumerating dataset list from disk...")
         self.train_list = self.enumerate_videos(os.path.join(self.train_path, '*', '*'))
         self.val_list   = self.enumerate_videos(os.path.join(self.val_path, '*', '*'))
         self.align_hash = self.enumerate_align_hash(self.train_list + self.val_list)
-        with open(self.get_cache_path(), 'wb') as fp:
-            pickle.dump((self.train_list, self.val_list, self.align_hash), fp)
+        #with open(self.get_cache_path(), 'wb') as fp:
+        #    pickle.dump((self.train_list, self.val_list, self.align_hash), fp)
 
         print("Found {} videos for training.".format(self.training_size))
         print("Found {} videos for validation.".format(self.validation_size))

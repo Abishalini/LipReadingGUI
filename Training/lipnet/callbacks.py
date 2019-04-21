@@ -1,4 +1,4 @@
-from lipnet.utils.wer import wer_sentence
+from wer import wer_sentence
 from nltk.translate import bleu_score
 import numpy as np
 import editdistance
@@ -67,7 +67,7 @@ class Statistics(keras.callbacks.Callback):
         return self.get_mean_tuples(wrapped_data, 1.0, bleu_score.sentence_bleu)
 
     def on_train_begin(self, logs={}):
-        with open(os.path.join(self.output_dir, 'stats.csv'), 'wb') as csvfile:
+        with open(os.path.join(self.output_dir, 'stats.csv'), 'w') as csvfile:
             csvw = csv.writer(csvfile)
             csvw.writerow(["Epoch", "Samples", "Mean CER", "Mean CER (Norm)", "Mean WER", "Mean WER (Norm)", "Mean BLEU", "Mean BLEU (Norm)"])
 
