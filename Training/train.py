@@ -2,6 +2,8 @@ import sys, os
 CURRENT_PATH = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, CURRENT_PATH)
 
+os.environ['KMP_DUPLICATE_LIB_OK']='True'
+
 from keras.optimizers import Adam
 from keras.callbacks import TensorBoard, CSVLogger, ModelCheckpoint
 from lipnet.generators import BasicGenerator

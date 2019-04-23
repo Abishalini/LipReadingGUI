@@ -1,42 +1,39 @@
-import sys
-sys.path.insert(0, '/Users/Abishalini/Desktop/LipReading')
+import sys, os
+CURRENT_PATH = os.path.dirname(os.path.abspath(__file__))
+LIPNET_PATH = os.path.join(CURRENT_PATH,'..','Training')
+sys.path.insert(0, LIPNET_PATH)
 
-import os
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
-from lipnet.lipreading.videos import Video
-from lipnet.lipreading.visualization import show_video_subtitle
-from lipnet.core.decoders import Decoder
-from lipnet.lipreading.helpers import labels_to_text
-from lipnet.utils.spell import Spell
-from lipnet.model2 import LipNet
+from lipnet.videos import Video
+from lipnet.visualization import show_video_subtitle
+from lipnet.decoders import Decoder
+from lipnet.helpers import labels_to_text
+from lipnet.spell import Spell
+from lipnet.model import LipNet
 from keras.optimizers import Adam
 from keras import backend as K
 import numpy as np
-import sys
 
 np.random.seed(55)
 
-CURRENT_PATH = os.path.dirname(os.path.abspath(__file__))
-print(CURRENT_PATH)
+VIDEO_PATH = os.path.join(CURRENT_PATH,'PredictVideo','brbk7n.mpg')
+WEIGHTS_PATH = os.path.join(CURRENT_PATH,'lipnet_weight.h5')
 
-VIDEO_PATH = os.path.join(CURRENT_PATH,'samples','GRID','brbk7n.mpg')
-WEIGHTS_PATH = os.path.join(CURRENT_PATH,'models','unseen-weights178.h5')
-
-FACE_PREDICTOR_PATH = os.path.join(CURRENT_PATH,'..','common','predictors','shape_predictor_68_face_landmarks.dat')
+FACE_PREDICTOR_PATH = os.path.join(CURRENT_PATH,'..','MouthExtract','shape_predictor_68_face_landmarks.dat')
 
 PREDICT_GREEDY      = False
 PREDICT_BEAM_WIDTH  = 200
-PREDICT_DICTIONARY  = os.path.join(CURRENT_PATH,'..','common','dictionaries','grid.txt')
+PREDICT_DICTIONARY  = os.path.join(CURRENT_PATH,'..','Training','dictionaries','grid.txt')
 
 def predict(weight_path, video_path, absolute_max_string_len=32, output_size=28):
-    print "\nLoading data from disk..."
+    print ("\nLoading data from disk...")
     video = Video(vtype='face', face_predictor_path=FACE_PREDICTOR_PATH)
     if os.path.isfile(video_path):
         video.from_video(video_path)
     else:
         video.from_frames(video_path)
-    print "Data loaded.\n"
+    print ("Data loaded.\n")
 
     if K.image_data_format() == 'channels_first':
         img_c, frames_n, img_w, img_h = video.data.shape
@@ -59,42 +56,12 @@ def predict(weight_path, video_path, absolute_max_string_len=32, output_size=28)
     X_data       = np.array([video.data]).astype(np.float32) / 255   # Normalize
     input_length = np.array([len(video.data)])
 
-    temp = [X_data, 0]
-    print(X_data.shape)
-
     y_pred         = lipnet.predict(X_data)
     result         = decoder.decode(y_pred, input_length)[0]
 
     return (video, result)
 
 if __name__ == '__main__':
-    '''
-    if len(sys.argv) == 3:
-        video, result = predict(sys.argv[1], sys.argv[2])
-    elif len(sys.argv) == 4:
-        video, result = predict(sys.argv[1], sys.argv[2], sys.argv[3])
-    elif len(sys.argv) == 5:
-        video, result = predict(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
-    else:
-        video, result = None, ""
-    '''
+
     video, result = predict(WEIGHTS_PATH, VIDEO_PATH)
-
-    if video is not None:
-        show_video_subtitle(video.face, result)
-
-    stripe = "-" * len(result)
-    print ""
-    print " __                   __  __          __      "
-    print "/\\ \\       __        /\\ \\/\\ \\        /\\ \\__   "
-    print "\\ \\ \\     /\\_\\  _____\\ \\ `\\\\ \\     __\\ \\ ,_\\  "
-    print " \\ \\ \\  __\\/\\ \\/\\ '__`\\ \\ , ` \\  /'__`\\ \\ \\/  "
-    print "  \\ \\ \\L\\ \\\\ \\ \\ \\ \\L\\ \\ \\ \\`\\ \\/\\  __/\\ \\ \\_ "
-    print "   \\ \\____/ \\ \\_\\ \\ ,__/\\ \\_\\ \\_\\ \\____\\\\ \\__\\"
-    print "    \\/___/   \\/_/\\ \\ \\/  \\/_/\\/_/\\/____/ \\/__/"
-    print "                  \\ \\_\\                       "
-    print "                   \\/_/                       "
-    print ""
-    print "             --{}- ".format(stripe)
-    print "[ DECODED ] |> {} |".format(result)
-    print "             --{}- ".format(stripe)
+    print("[ THE PERSON SAID ] > | {} |".format(result))

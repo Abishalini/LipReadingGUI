@@ -1,4 +1,7 @@
-import os
+import sys, os
+CURRENT_PATH = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, CURRENT_PATH)
+
 import numpy as np
 from keras import backend as K
 from scipy import ndimage
