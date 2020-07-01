@@ -1,8 +1,8 @@
 from videos import Video
 import os, fnmatch, errno
 from skimage import io
-
 import sys
+
 CURRENT_PATH = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, CURRENT_PATH)
 
