@@ -75,4 +75,13 @@ def train(run_name, start_epoch, stop_epoch, img_c, img_w, img_h, frames_n, abso
 
 if __name__ == '__main__':
     run_name = datetime.datetime.now().strftime('%Y:%m:%d:%H:%M:%S')
+    # 1st parameter - run_name
+    # 2nd parameter - start_epoch
+    # 3rd parameter - stop_epoch
+    # 4th parameter - img_c (num of channel)
+    # 5th parameter - img_w
+    # 6th parameter - img_h
+    # 7th parameter - frames_n
+    # 8th parameter - absolute_max_string_length
+    # 9th parameter - minibatch_size
     train(run_name, 0, 5000, 3, 100, 50, 75, 32, 2)
